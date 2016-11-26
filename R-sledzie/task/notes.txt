@@ -1,0 +1,24 @@
+Celem projektu jest okreœlenie jakie mog¹ byæ g³ówne przyczyny stopniowego zmniejszania siê d³ugoœci œledzi oceanicznych wy³awianych w Europie.
+
+
+Ponadto raport powinien zaczynaæ siê od rozdzia³u podsumowuj¹cego ca³¹ analizê, streszczaj¹cego najwa¿niejsze spostrze¿enia analityka. 
+
+zrozumienie danych, 
+czytelna prezentacja wyników 
+stosowanie siê do podstawowych zasad wizualizacji danych
+technicznej strony raportu
+podstaw¹ oceny z projektu. 
+
+Po wstêpie, raport powinien zawieraæ nastêpuj¹ce elementy:
+
+Kod wyliczaj¹cy wykorzystane biblioteki.
+Kod zapewniaj¹cy powtarzalnoœæ wyników przy ka¿dym uruchomieniu raportu na tych samych danych.
+Kod pozwalaj¹cy wczytaæ dane z pliku.
+Kod przetwarzaj¹cy brakuj¹ce dane.
+Sekcjê podsumowuj¹c¹ rozmiar zbioru i podstawowe statystyki.
+Szczegó³ow¹ analizê wartoœci atrybutów (np. poprzez prezentacjê rozk³adów wartoœci).
+Sekcjê sprawdzaj¹c¹ korelacje miêdzy zmiennymi; sekcja ta powinna zawieraæ jak¹œ formê graficznej prezentacji korelacji.
+Interaktywny wykres lub animacjê prezentuj¹c¹ zmianê rozmiaru œledzi w czasie.
+Sekcjê próbuj¹c¹ stworzyæ regresor przewiduj¹cy rozmiar œledzia (w tej sekcji nale¿y wykorzystaæ wiedzê z pozosta³ych punktów oraz wykonaæ dodatkowe czynnoœci, które mog¹ poprawiæ trafnoœæ predykcji); dobór parametrów modelu oraz oszacowanie jego skutecznoœci powinny zostaæ wykonane za pomoc¹ techniki podzia³u zbioru na dane ucz¹ce, waliduj¹ce i testowe; trafnoœæ regresji powinna zostaæ oszacowana na podstawie miar R2R2 i RMSERMSE.
+Analizê wa¿noœci atrybutów najlepszego znalezionego modelu regresji. Analiza wa¿noœci atrybutów powinna stanowiæ próbê odpowiedzi na pytanie: co sprawia, ¿e rozmiar œledzi zacz¹³ w pewnym momencie maleæ.
+Jeœli analityk uzna to za stosowne, powy¿sze punkty mogê byæ wykonane w innej kolejnoœci. Analityk nie musi, a nawet nie powinien, ograniczaæ siê do powy¿szych punktów. Wszelkie dodatkowe techniki analizy danych, wizualizacje, spostrze¿enia bêd¹ pozytwnie wp³ywa³y na ocenê.

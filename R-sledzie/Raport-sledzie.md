@@ -1,22 +1,11 @@
----
-title: "Raport - śledzie"
-author: "FW"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: 
-  html_document: 
-    fig_caption: yes
-    keep_md: yes
-    toc: yes
-    toc_float: yes
----
+# Raport - śledzie
+FW  
+`r format(Sys.time(), '%d %B, %Y')`  
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 # Wstęp
 
-// TODO 
 Ponadto raport powinien zaczynać się od rozdziału podsumowującego całą analizę, streszczającego najważniejsze spostrzeżenia analityka.
 
 # Analiza
