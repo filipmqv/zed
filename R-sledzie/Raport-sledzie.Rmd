@@ -6,12 +6,12 @@ output:
   html_document: 
     fig_caption: yes
     keep_md: yes
+    number_sections: yes
     toc: yes
-    toc_float: yes
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=F}
+knitr::opts_chunk$set(echo = T)
 ```
 
 # Wstęp
@@ -19,36 +19,92 @@ knitr::opts_chunk$set(echo = TRUE)
 // TODO 
 Ponadto raport powinien zaczynać się od rozdziału podsumowującego całą analizę, streszczającego najważniejsze spostrzeżenia analityka.
 
-# Analiza
+# Wstępne przetwarzanie danych
 
-### Kod wyliczający wykorzystane biblioteki.
+## Kod wyliczający wykorzystane biblioteki.
 
+Wykorzystano następujące biblioteki: 
 
-### Kod zapewniający powtarzalność wyników przy każdym uruchomieniu raportu na tych samych danych.
-
-
-### Kod pozwalający wczytać dane z pliku.
-
-
-### Kod przetwarzający brakujące dane.
-
-
-### Sekcję podsumowującą rozmiar zbioru i podstawowe statystyki.
+```{r load_libraries, message=F, warning=F}
+library(dplyr)
+library(ggplot2)
+library(plotly)
+```
 
 
-### Szczegółową analizę wartości atrybutów (np. poprzez prezentację rozkładów wartości).
+## Kod pozwalający wczytać dane z pliku.
+
+```{r load_data, echo=F}
+herring <- read.csv('sledzie.csv')
+```
 
 
-### Sekcję sprawdzającą korelacje między zmiennymi; sekcja ta powinna zawierać jakąś formę graficznej prezentacji korelacji.
+## Kod zapewniający powtarzalność wyników przy każdym uruchomieniu raportu na tych samych danych.
 
 
-### Interaktywny wykres lub animację prezentującą zmianę rozmiaru śledzi w czasie.
+## Kod przetwarzający brakujące dane.
 
 
-### Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2R2 i RMSERMSE.
+## Sekcję podsumowującą rozmiar zbioru i podstawowe statystyki.
+
+W poniższej tabeli przedstawiono kilka pierwszych wierszy z tabeli: 
+
+```{r head}
+knitr::kable(head(herring))
+```
+
+Oznaczenia kolumn:
+
+* X: numer badania (chronologicznie);
+* length: długość złowionego śledzia [cm];
+* cfin1: dostępność planktonu [zagęszczenie Calanus finmarchicus gat. 1];
+* cfin2: dostępność planktonu [zagęszczenie Calanus finmarchicus gat. 2];
+* chel1: dostępność planktonu [zagęszczenie Calanus helgolandicus gat. 1];
+* chel2: dostępność planktonu [zagęszczenie Calanus helgolandicus gat. 2];
+* lcop1: dostępność planktonu [zagęszczenie widłonogów gat. 1];
+* lcop2: dostępność planktonu [zagęszczenie widłonogów gat. 2];
+* fbar: natężenie połowów w regionie [ułamek pozostawionego narybku];
+* recr: roczny narybek [liczba śledzi];
+* cumf: łączne roczne natężenie połowów w regionie [ułamek pozostawionego narybku];
+* totaln: łączna liczba ryb złowionych w ramach połowu [liczba śledzi];
+* sst: temperatura przy powierzchni wody [°C];
+* sal: poziom zasolenia wody [Knudsen ppt];
+* xmonth: miesiąc połowu [numer miesiąca];
+* nao: oscylacja północnoatlantycka [mb].
+
+Poniżej przedstawiono statystyki poszczególnych kolumn:
+
+```{r summary}
+knitr::kable(summary(herring))
+```
+
+# Analiza danych
+
+## Szczegółową analizę wartości atrybutów (np. poprzez prezentację rozkładów wartości).
 
 
-### Analizę ważności atrybutów najlepszego znalezionego modelu regresji. Analiza ważności atrybutów powinna stanowić próbę odpowiedzi na pytanie: co sprawia, że rozmiar śledzi zaczął w pewnym momencie maleć.
+## Sekcję sprawdzającą korelacje między zmiennymi; sekcja ta powinna zawierać jakąś formę graficznej prezentacji korelacji.
 
 
-### Jeśli analityk uzna to za stosowne, powyższe punkty mogę być wykonane w innej kolejności. Analityk nie musi, a nawet nie powinien, ograniczać się do powyższych punktów. Wszelkie dodatkowe techniki analizy danych, wizualizacje, spostrzeżenia będą pozytwnie wpływały na ocenę.
+## Interaktywny wykres lub animację prezentującą zmianę rozmiaru śledzi w czasie.
+
+```{r plots}
+ggplot(herring, aes(x=X, y=length)) + geom_smooth() + theme_bw()
+
+ggplot(herring, aes(x=X, y=length)) + geom_smooth() + theme_bw() + facet_wrap(~xmonth)
+
+ggplot(herring, aes(x=X, y=totaln)) + geom_smooth() + theme_bw()
+
+ggplot(herring, aes(x=X, y=nao)) + geom_smooth() + theme_bw()
+```
+
+
+# Regresor
+
+## Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2R2 i RMSERMSE.
+
+
+## Analizę ważności atrybutów najlepszego znalezionego modelu regresji. Analiza ważności atrybutów powinna stanowić próbę odpowiedzi na pytanie: co sprawia, że rozmiar śledzi zaczął w pewnym momencie maleć.
+
+
+## Jeśli analityk uzna to za stosowne, powyższe punkty mogę być wykonane w innej kolejności. Analityk nie musi, a nawet nie powinien, ograniczać się do powyższych punktów. Wszelkie dodatkowe techniki analizy danych, wizualizacje, spostrzeżenia będą pozytwnie wpływały na ocenę.
