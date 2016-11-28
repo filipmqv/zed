@@ -1,0 +1,7 @@
+base
+dplyr
+tidyr
+ggplot2
+plotly
+zoo
+reshape2

@@ -27,29 +27,44 @@ Wykorzystano następujące biblioteki:
 
 ```{r load_libraries, message=F, warning=F}
 library(dplyr)
+library(tidyr)
 library(ggplot2)
 library(plotly)
+library(zoo)
+library(reshape2)
 ```
 
 
 ## Kod pozwalający wczytać dane z pliku.
 
-```{r load_data, echo=F}
-herring <- read.csv('sledzie.csv')
+```{r load_data, echo=F, cache=T}
+herring <- read.csv('sledzie.csv', na.strings = "?")
 ```
 
+```{r dimensions, echo=F, cache=T}
+dimens <- dim(herring)
+```
+
+Dane zawierają `r dimens[1]` próbek (wierszy) oraz `r dimens[2]` atrybutów (kolumn).
 
 ## Kod zapewniający powtarzalność wyników przy każdym uruchomieniu raportu na tych samych danych.
 
 
 ## Kod przetwarzający brakujące dane.
 
+```{r deal_with_NA, echo=F, cache=T}
+# use zoo library to insert value from previous row instead of NA
+herring <- zoo::na.locf(herring, na.rm = F)
+# remove NA from first line (or any other left)
+herring <- herring %>% filter(complete.cases(.))
+```
+
 
 ## Sekcję podsumowującą rozmiar zbioru i podstawowe statystyki.
 
 W poniższej tabeli przedstawiono kilka pierwszych wierszy z tabeli: 
 
-```{r head}
+```{r head, cache=T}
 knitr::kable(head(herring))
 ```
 
@@ -74,7 +89,7 @@ Oznaczenia kolumn:
 
 Poniżej przedstawiono statystyki poszczególnych kolumn:
 
-```{r summary}
+```{r summary, cache=T}
 knitr::kable(summary(herring))
 ```
 
@@ -82,26 +97,73 @@ knitr::kable(summary(herring))
 
 ## Szczegółową analizę wartości atrybutów (np. poprzez prezentację rozkładów wartości).
 
+```{r length(X), cache=T}
+ggplot(herring, aes(x=X, y=length)) + geom_point() + geom_smooth() + theme_bw()
+```
+
+```{r length(X)_by_months, cache=T}
+ggplot(herring, aes(x=X, y=length)) + geom_point() + geom_smooth() + theme_bw() + ylim(min(herring$length),max(herring$length)) + facet_wrap(~xmonth)
+```
+
+```{r totaln(X), cache=T}
+ggplot(herring, aes(x=X, y=totaln)) + geom_point() + geom_smooth() + theme_bw()
+```
+
+```{r recr(X), cache=T}
+ggplot(herring, aes(x=X, y=recr)) + geom_point() + geom_smooth() + theme_bw()
+```
+
+```{r food(X), cache=T}
+food <- herring %>% gather(type, amount, cfin1:lcop2)
+ggplot(food, aes(x = X, y = amount, colour = type)) + geom_smooth() + theme_bw()
+```
+
+Natężenie połowów w trakcie pomiaru oraz łączne roczne natężęnie połowów:
+
+```{r fbar+cumf(X), cache=T}
+fbar_cumf <- herring %>% gather(type, amount, c(fbar, cumf))
+ggplot(fbar_cumf, aes(x = X, y = amount, colour = type)) + geom_point() + geom_smooth() + theme_bw()
+
+```
+
+
+
+
+
+Inne czynniki środowiskowe:
+
+```{r sst(X), cache=T}
+ggplot(herring, aes(x=X, y=sst)) + geom_point() + geom_smooth() + theme_bw()
+```
+
+```{r sal(X), cache=T}
+ggplot(herring, aes(x=X, y=sal)) + geom_point() + geom_smooth() + theme_bw()
+```
+
+```{r nao(X), cache=T}
+ggplot(herring, aes(x=X, y=nao)) + geom_point() + geom_smooth() + theme_bw()
+```
 
 ## Sekcję sprawdzającą korelacje między zmiennymi; sekcja ta powinna zawierać jakąś formę graficznej prezentacji korelacji.
+
+```{r correlation}
+# get correlation matrix
+cor_matrix <- round(cor(herring, method="pearson"), 2)
+# get lower triangle
+cor_matrix[lower.tri(cor_matrix)] <- NA
+# use reshape2 library to melt matrix for plotting
+melted_cor_matrix <- melt(cor_matrix, na.rm = TRUE)
+ggplot(data = melted_cor_matrix, aes(x=Var2, y=Var1, fill=value)) + geom_tile() + scale_fill_gradient2(low = "red", high = "green", mid = "gray", midpoint = 0, limit = c(-1,1), space = "Lab") + geom_text(aes(Var2, Var1, label = value), color = "black", size = 4) + theme_bw()
+```
+
 
 
 ## Interaktywny wykres lub animację prezentującą zmianę rozmiaru śledzi w czasie.
 
-```{r plots}
-ggplot(herring, aes(x=X, y=length)) + geom_smooth() + theme_bw()
-
-ggplot(herring, aes(x=X, y=length)) + geom_smooth() + theme_bw() + facet_wrap(~xmonth)
-
-ggplot(herring, aes(x=X, y=totaln)) + geom_smooth() + theme_bw()
-
-ggplot(herring, aes(x=X, y=nao)) + geom_smooth() + theme_bw()
-```
-
 
 # Regresor
 
-## Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2R2 i RMSERMSE.
+## Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2 i RMSE.
 
 
 ## Analizę ważności atrybutów najlepszego znalezionego modelu regresji. Analiza ważności atrybutów powinna stanowić próbę odpowiedzi na pytanie: co sprawia, że rozmiar śledzi zaczął w pewnym momencie maleć.
