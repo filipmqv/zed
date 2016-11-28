@@ -48,8 +48,6 @@ dimens <- dim(herring)
 Dane zawierają `r dimens[1]` próbek (wierszy) oraz `r dimens[2]` atrybutów (kolumn).
 
 ## Kod zapewniający powtarzalność wyników przy każdym uruchomieniu raportu na tych samych danych.
-
-
 ## Kod przetwarzający brakujące dane.
 
 ```{r deal_with_NA, echo=F, cache=T}
@@ -126,10 +124,6 @@ ggplot(fbar_cumf, aes(x = X, y = amount, colour = type)) + geom_point() + geom_s
 
 ```
 
-
-
-
-
 Inne czynniki środowiskowe:
 
 ```{r sst(X), cache=T}
@@ -146,7 +140,7 @@ ggplot(herring, aes(x=X, y=nao)) + geom_point() + geom_smooth() + theme_bw()
 
 ## Sekcję sprawdzającą korelacje między zmiennymi; sekcja ta powinna zawierać jakąś formę graficznej prezentacji korelacji.
 
-```{r correlation}
+```{r correlation, cache=T}
 # get correlation matrix
 cor_matrix <- round(cor(herring, method="pearson"), 2)
 # get lower triangle
@@ -159,6 +153,11 @@ ggplot(data = melted_cor_matrix, aes(x=Var2, y=Var1, fill=value)) + geom_tile() 
 
 
 ## Interaktywny wykres lub animację prezentującą zmianę rozmiaru śledzi w czasie.
+
+```{r plotly, cache=T}
+p <- ggplot(herring, aes(x=X, y=length)) + geom_smooth() + theme_bw()
+ggplotly(p)
+```
 
 
 # Regresor
