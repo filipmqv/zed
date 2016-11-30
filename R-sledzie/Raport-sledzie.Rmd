@@ -170,7 +170,7 @@ ggplotly(p)
 
 ## Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2 i RMSE.
 
-```{r regression_data_partition}
+```{r regression_data_partition, cache=T}
 set.seed(42)
 inTraining <- 
     createDataPartition(
@@ -185,7 +185,7 @@ training <- herring[ inTraining,]
 testing  <- herring[-inTraining,]
 ```
 
-```{r regression_train_control}
+```{r regression_train_control, cache=T}
 ctrl <- trainControl(
     # powtórzona ocena krzyżowa
     method = "repeatedcv",
@@ -207,11 +207,11 @@ fit <- train(length ~ .,
 
 ```
 
-```{r fit_table}
+```{r fit_table, cache=T}
 fit
 ```
 
-```{r predict}
+```{r predict, cache=T}
 predictions <- predict(fit, newdata = testing)
 postResample(pred = predictions, obs = testing$length)
 ```
@@ -222,9 +222,10 @@ postResample(pred = predictions, obs = testing$length)
 0,8 - 0,9 - dopasowanie dobre
 0,9 - 1,0 - dopasowanie bardzo dobre
 
-```{r plot_prediction_vs_testing}
+```{r plot_prediction_vs_testing, cache=T}
 predictions_testing <- data.frame(X = 1:length(predictions), pred = predictions, test = testing$length)
 predictions_testing <- predictions_testing %>% gather(type, amount, c(pred, test))
+ggplot(predictions_testing, aes(x = X, y = amount, colour = type)) + geom_point() + theme_bw()
 ggplot(predictions_testing, aes(x = X, y = amount, colour = type)) + geom_smooth() + theme_bw()
 ```
 
