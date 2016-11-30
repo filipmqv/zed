@@ -61,7 +61,7 @@ herring <- herring %>% filter(complete.cases(.))
 ```
 
 
-## Podsumowanie rozmiaru zbioru i podstawowe statystyki.
+## Podsumowanie rozmiaru zbioru i podstawowe statystyki
 
 ```{r dimensions2, echo=F, cache=T}
 dimens <- dim(herring)
@@ -251,7 +251,9 @@ ggplot(predictions_testing, aes(x = X, y = amount, colour = type)) + geom_smooth
 
 Wykres funkcji przewidującej długość śledzia w znacznym stopniu pokrywa się z wykresem stworzonym na bazie danych testowych. 
 
-## Analizę ważności atrybutów najlepszego znalezionego modelu regresji. Analiza ważności atrybutów powinna stanowić próbę odpowiedzi na pytanie: co sprawia, że rozmiar śledzi zaczął w pewnym momencie maleć.
+## Analiza ważności atrybutów
+
+Poniższy wykres pokazuje poziom ważności atrybutów w modelu użytym do predykcji rozmiaru śledzi:
 
 ```{r importance, echo=F, warning=F, message=F}
 imp <- varImp(fit, scale=FALSE)
@@ -259,4 +261,4 @@ lbls <- sort(round(imp$importance[1]$Overall, 2), decreasing = T)
 ggplot(imp, mapping = NULL, top = dim(imp$importance)[1], environment = NULL) + theme_bw() + ylab("Ważność") + xlab("Atrybuty") + ggtitle("Ważność atrybutów w modelu") + geom_text(hjust = 1, label = lbls)
 ```
 
-## Jeśli analityk uzna to za stosowne, powyższe punkty mogę być wykonane w innej kolejności. Analityk nie musi, a nawet nie powinien, ograniczać się do powyższych punktów. Wszelkie dodatkowe techniki analizy danych, wizualizacje, spostrzeżenia będą pozytwnie wpływały na ocenę.
+Z analizy ważności atrybutów wynika, że na rozmiar śledzia w największym stopniu ma wpływ miesiąc połowu oraz temperatura przy powierzchni wody.

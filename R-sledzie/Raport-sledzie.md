@@ -42,7 +42,7 @@ W celu uzupełnienia brakujących wartości zastosowano metodę locf() z bibliot
 
 
 
-## Podsumowanie rozmiaru zbioru i podstawowe statystyki.
+## Podsumowanie rozmiaru zbioru i podstawowe statystyki
 
 
 
@@ -196,8 +196,10 @@ Poniższe wykresy prezentują skuteczność przewidywań w odniesieniu do danych
 
 Wykres funkcji przewidującej długość śledzia w znacznym stopniu pokrywa się z wykresem stworzonym na bazie danych testowych. 
 
-## Analizę ważności atrybutów najlepszego znalezionego modelu regresji. Analiza ważności atrybutów powinna stanowić próbę odpowiedzi na pytanie: co sprawia, że rozmiar śledzi zaczął w pewnym momencie maleć.
+## Analiza ważności atrybutów
+
+Poniższy wykres pokazuje poziom ważności atrybutów w modelu użytym do predykcji rozmiaru śledzi:
 
 ![](Raport-sledzie_files/figure-html/importance-1.png)<!-- -->
 
-## Jeśli analityk uzna to za stosowne, powyższe punkty mogę być wykonane w innej kolejności. Analityk nie musi, a nawet nie powinien, ograniczać się do powyższych punktów. Wszelkie dodatkowe techniki analizy danych, wizualizacje, spostrzeżenia będą pozytwnie wpływały na ocenę.
+Z analizy ważności atrybutów wynika, że na rozmiar śledzia w największym stopniu ma wpływ miesiąc połowu oraz temperatura przy powierzchni wody.
