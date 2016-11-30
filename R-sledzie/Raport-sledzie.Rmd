@@ -21,7 +21,7 @@ Ponadto raport powinien zaczynać się od rozdziału podsumowującego całą ana
 
 # Wstępne przetwarzanie danych
 
-## Kod wyliczający wykorzystane biblioteki.
+## Użyte biblioteki i przygotowanie zbioru danych
 
 Wykorzystano następujące biblioteki: 
 
@@ -40,10 +40,8 @@ library(reshape2)
 library(caret) # <- install.packages("caret", dependencies = c("Depends", "Suggests"))
 ```
 
-
-## Kod pozwalający wczytać dane z pliku.
-
 ```{r load_data, echo=F, cache=T}
+# load data from file
 herring <- read.csv('sledzie.csv', na.strings = "?")
 ```
 
@@ -51,10 +49,9 @@ herring <- read.csv('sledzie.csv', na.strings = "?")
 dimens <- dim(herring)
 ```
 
-Dane zawierają `r dimens[1]` próbek (wierszy) oraz `r dimens[2]` atrybutów (kolumn).
+Surowe dane zawierają `r dimens[1]` próbek (wierszy) oraz `r dimens[2]` atrybutów (kolumn).
 
-## Kod zapewniający powtarzalność wyników przy każdym uruchomieniu raportu na tych samych danych.
-## Kod przetwarzający brakujące dane.
+W celu uzupełnienia brakujących wartości zastosowano metodę locf() z biblioteki zoo, która uzupełnia wartości NA na podstawie komórki znajdującej się w poprzednim wierszu. Wiersze, w których po tej operacji wartości NA pozostały (np pierwszy wiersz), są usuwane.
 
 ```{r deal_with_NA, echo=F, cache=T}
 # use zoo library to insert value from previous row instead of NA
@@ -64,17 +61,23 @@ herring <- herring %>% filter(complete.cases(.))
 ```
 
 
-## Sekcję podsumowującą rozmiar zbioru i podstawowe statystyki.
+## Podsumowanie rozmiaru zbioru i podstawowe statystyki.
+
+```{r dimensions2, echo=F, cache=T}
+dimens <- dim(herring)
+```
+
+Dane po przetworzeniu i uzupełnieniu brakujących wartości zawierają `r dimens[1]` próbek (wierszy) oraz `r dimens[2]` atrybutów (kolumn).
 
 W poniższej tabeli przedstawiono kilka pierwszych wierszy z tabeli: 
 
-```{r head, cache=T}
+```{r head, echo=F, cache=T}
 knitr::kable(head(herring))
 ```
 
 Oznaczenia kolumn:
 
-* X: numer badania (chronologicznie);
+* X: numer badania (chronologicznie) wyznaczający upływ czasu;
 * length: długość złowionego śledzia [cm];
 * cfin1: dostępność planktonu [zagęszczenie Calanus finmarchicus gat. 1];
 * cfin2: dostępność planktonu [zagęszczenie Calanus finmarchicus gat. 2];
@@ -93,84 +96,96 @@ Oznaczenia kolumn:
 
 Poniżej przedstawiono statystyki poszczególnych kolumn:
 
-```{r summary, cache=T}
+```{r summary, echo=F, cache=T}
 knitr::kable(summary(herring))
 ```
 
 # Analiza danych
 
-## Szczegółową analizę wartości atrybutów (np. poprzez prezentację rozkładów wartości).
+## Wykresy atrybutów
 
-```{r length(X), cache=T}
-ggplot(herring, aes(x=X, y=length)) + geom_point() + geom_smooth() + theme_bw()
+Poniższe wykresy przedstawiają zmianę poszczególnych atrybutów w czasie. 
+
+```{r length(X), echo=F, cache=T, message=F, warning=F}
+ggplot(herring, aes(x=X, y=length)) + geom_point() + geom_smooth() + theme_bw() + xlab("Czas") + ylab("Długość śledzia [cm]") + ggtitle("Długość śledzia")
 ```
 
-```{r length(X)_by_months, cache=T}
-ggplot(herring, aes(x=X, y=length)) + geom_point() + geom_smooth() + theme_bw() + ylim(min(herring$length),max(herring$length)) + facet_wrap(~xmonth)
+```{r length(X)_by_months, echo=F, cache=T, message=F, warning=F}
+ggplot(herring, aes(x=X, y=length)) + geom_point() + geom_smooth() + theme_bw() + ylim(min(herring$length),max(herring$length)) + facet_wrap(~xmonth) + xlab("Czas") + ylab("Długość śledzia [cm]") + ggtitle("Długość śledzia w zależności od miesiąca połowu")
 ```
 
-```{r totaln(X), cache=T}
-ggplot(herring, aes(x=X, y=totaln)) + geom_point() + geom_smooth() + theme_bw()
+```{r totaln(X), echo=F, cache=T, message=F, warning=F}
+ggplot(herring, aes(x=X, y=totaln)) + geom_point() + geom_smooth() + theme_bw() + xlab("Czas") + ylab("Połów [szt]") + ggtitle("Łączna liczba ryb złowionych w ramach połowu")
 ```
 
-```{r recr(X), cache=T}
-ggplot(herring, aes(x=X, y=recr)) + geom_point() + geom_smooth() + theme_bw()
+```{r recr(X), echo=F, cache=T, message=F, warning=F}
+ggplot(herring, aes(x=X, y=recr)) + geom_point() + geom_smooth() + theme_bw() + xlab("Czas") + ylab("Roczny narybek [szt]") + ggtitle("Roczny narybek")
 ```
 
-```{r food(X), cache=T}
+```{r food(X), echo=F, cache=T, message=F, warning=F}
 food <- herring %>% gather(type, amount, cfin1:lcop2)
-ggplot(food, aes(x = X, y = amount, colour = type)) + geom_smooth() + theme_bw()
+ggplot(food, aes(x = X, y = amount, colour = type)) + geom_smooth() + theme_bw() + xlab("Czas") + ylab("Pokarm [zagęszczenie]") + ggtitle("Dostępność planktonu")
 ```
 
-Natężenie połowów w trakcie pomiaru oraz łączne roczne natężęnie połowów:
-
-```{r fbar+cumf(X), cache=T}
+```{r fbar+cumf(X), echo=F, cache=T, message=F, warning=F}
 fbar_cumf <- herring %>% gather(type, amount, c(fbar, cumf))
-ggplot(fbar_cumf, aes(x = X, y = amount, colour = type)) + geom_point() + geom_smooth() + theme_bw()
+ggplot(fbar_cumf, aes(x = X, y = amount, colour = type)) + geom_point() + geom_smooth() + theme_bw() + xlab("Czas") + ylab("Natężenie [ułamek pozostawionego narybku]") + ggtitle("Natężenie połowów w trakcie pomiaru (fbar) \noraz łączne roczne natężęnie połowów (cumf)")
 
 ```
 
 Inne czynniki środowiskowe:
 
-```{r sst(X), cache=T}
-ggplot(herring, aes(x=X, y=sst)) + geom_point() + geom_smooth() + theme_bw()
+```{r sst(X), echo=F, cache=T, message=F, warning=F}
+ggplot(herring, aes(x=X, y=sst)) + geom_point() + geom_smooth() + theme_bw() + xlab("Czas") + ylab("Temperatura przy powierzchni wody [°C]") + ggtitle("Temperatura przy powierzchni wody")
 ```
 
-```{r sal(X), cache=T}
-ggplot(herring, aes(x=X, y=sal)) + geom_point() + geom_smooth() + theme_bw()
+```{r sal(X), echo=F, cache=T, message=F, warning=F}
+ggplot(herring, aes(x=X, y=sal)) + geom_point() + geom_smooth() + theme_bw() + xlab("Czas") + ylab("Poziom zasolenia wody [Knudsen ppt]") + ggtitle("Poziom zasolenia wody")
 ```
 
-```{r nao(X), cache=T}
-ggplot(herring, aes(x=X, y=nao)) + geom_point() + geom_smooth() + theme_bw()
+```{r nao(X), echo=F, cache=T, message=F, warning=F}
+ggplot(herring, aes(x=X, y=nao)) + geom_point() + geom_smooth() + theme_bw() + xlab("Czas") + ylab("Oscylacja północnoatlantycka [mb]") + ggtitle("Oscylacja północnoatlantycka")
 ```
 
-## Sekcję sprawdzającą korelacje między zmiennymi; sekcja ta powinna zawierać jakąś formę graficznej prezentacji korelacji.
+## Korelacja
 
-```{r correlation, cache=T}
+Wykres przedstawia korelację Pearsona pomiędzy poszczególnymi zmierzonymi atrybutami:
+
+```{r correlation, cache=T, echo=F}
 # get correlation matrix
 cor_matrix <- round(cor(herring, method="pearson"), 2)
 # get lower triangle
 cor_matrix[lower.tri(cor_matrix)] <- NA
 # use reshape2 library to melt matrix for plotting
 melted_cor_matrix <- melt(cor_matrix, na.rm = TRUE)
-ggplot(data = melted_cor_matrix, aes(x=Var2, y=Var1, fill=value)) + geom_tile() + scale_fill_gradient2(low = "red", high = "green", mid = "gray", midpoint = 0, limit = c(-1,1), space = "Lab") + geom_text(aes(Var2, Var1, label = value), color = "black", size = 4) + theme_bw()
+ggplot(data = melted_cor_matrix, aes(x=Var2, y=Var1, fill=value)) + geom_tile() + scale_fill_gradient2(low = "red", high = "green", mid = "gray", midpoint = 0, limit = c(-1,1), space = "Lab") + geom_text(aes(Var2, Var1, label = value), color = "black", size = 4) + theme_bw() + xlab("Atrybuty") + ylab("Atrybuty") + ggtitle("Korelacja")
 ```
 
+## Interaktywny wykres
 
+Poniższy wykres pozwala na zapoznanie się ze zmianą rozmiaru śledzia w czasie z dokładnością do pojedynczego momentu w czasie:
 
-## Interaktywny wykres lub animację prezentującą zmianę rozmiaru śledzi w czasie.
-
-```{r plotly, cache=T}
-p <- ggplot(herring, aes(x=X, y=length)) + geom_smooth() + theme_bw()
+```{r plotly, cache=T, echo=F,message=F, warning=F}
+p <- ggplot(herring, aes(x=X, y=length)) + geom_smooth() + theme_bw() + xlab("Czas") + ylab("Długość śledzia [cm]") + ggtitle("Długość śledzia")
 ggplotly(p)
 ```
 
-
 # Regresor
 
-## Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2 i RMSE.
+## Przewidywanie rozmiaru śledzia
 
-```{r regression_data_partition, cache=T}
+W tym rozdziale, na podstawie wiedzy pozyskanej z wstępnej analizy danych, spróbowano stworzyć regresor przewidujący rozmiar śledzia w zależności od wartości atrybutów. 
+
+Zbiór został podzielony na dane uczące, walidujące (75%) i testowe (25%) w taki sposób, aby zachować równomierny rozkład danych w zbiorach - atrybutem stratyfikującym jest rozmiar śledzia. Do przygotowania zbiorów użyto metody powtórzonej oceny krzyżowej z liczbą podziałów równą 2 oraz 3 powtórzeniami. 
+
+W fazie uczącej zastosowano algorytm Random Forest z następującymi parametrami: 
+
+* ntree = 10,
+* mtry = 8 (wartość ta została wybrana na podstawie testów w zakresie 1-30; taka wartość pozwala na uzyskanie najlepszego rezultatu predykcji)
+
+Trafność regresji szacowana jest na podstawie miar R2 oraz RMSE. 
+
+```{r regression_data_partition, cache=T, echo=F, message=F, warning=F}
 set.seed(42)
 inTraining <- 
     createDataPartition(
@@ -178,14 +193,13 @@ inTraining <-
         y = herring$length,
         # procent w zbiorze uczącym
         p = .75,
-        # chcemy indeksy a nie listę
         list = FALSE)
 
 training <- herring[ inTraining,]
 testing  <- herring[-inTraining,]
 ```
 
-```{r regression_train_control, cache=T}
+```{r regression_train_control, cache=T, echo=F, message=F, warning=F}
 ctrl <- trainControl(
     # powtórzona ocena krzyżowa
     method = "repeatedcv",
@@ -196,42 +210,53 @@ ctrl <- trainControl(
 
 ```
 
-```{r regression_fit, cache=T}
+```{r regression_fit, cache=T, echo=F, message=F, warning=F}
 fit <- train(length ~ .,
              data = training,
              method = "rf",
              trControl = ctrl,
-             #tuneLength = 20)
+             importance = T, # produce importance to inspect it later
              ntree = 10)
-
-
 ```
 
-```{r fit_table, cache=T}
+Poniżej przedstawiono rezultaty fazy uczącej:
+
+```{r fit_table, cache=T, echo=F}
 fit
 ```
 
-```{r predict, cache=T}
+Poniższe miary wskazują na jakość predykcji:
+
+```{r predict, cache=T, echo=F}
 predictions <- predict(fit, newdata = testing)
 postResample(pred = predictions, obs = testing$length)
 ```
 
-0,0 - 0,5 - dopasowanie niezadowalające
-0,5 - 0,6 - dopasowanie słabe
-0,6 - 0,8 - dopasowanie zadowalające
-0,8 - 0,9 - dopasowanie dobre
-0,9 - 1,0 - dopasowanie bardzo dobre
+Wartość miary RMSE powinna być jak najbliższa wartości 1, natomiast znaczenie metryki R2 jest następujące:
 
-```{r plot_prediction_vs_testing, cache=T}
-predictions_testing <- data.frame(X = 1:length(predictions), pred = predictions, test = testing$length)
-predictions_testing <- predictions_testing %>% gather(type, amount, c(pred, test))
-ggplot(predictions_testing, aes(x = X, y = amount, colour = type)) + geom_point() + theme_bw()
-ggplot(predictions_testing, aes(x = X, y = amount, colour = type)) + geom_smooth() + theme_bw()
+* 0,0 - 0,5 - dopasowanie niezadowalające
+* 0,5 - 0,6 - dopasowanie słabe
+* 0,6 - 0,8 - dopasowanie zadowalające
+* 0,8 - 0,9 - dopasowanie dobre
+* 0,9 - 1,0 - dopasowanie bardzo dobre
+
+Poniższe wykresy prezentują skuteczność przewidywań w odniesieniu do danych testowych:
+
+```{r plot_prediction_vs_testing, cache=T, echo=F, message=F, warning=F}
+predictions_testing <- data.frame(X = 1:length(predictions), przewidywana = predictions, testowa = testing$length)
+predictions_testing <- predictions_testing %>% gather(type, amount, c(przewidywana, testowa))
+ggplot(predictions_testing, aes(x = X, y = amount, colour = type)) + geom_point() + theme_bw() + xlab("Czas") + ylab("Długość śledzia [cm]") + ggtitle("Przewidywana długość śledzia")
+ggplot(predictions_testing, aes(x = X, y = amount, colour = type)) + geom_smooth() + theme_bw() + xlab("Czas") + ylab("Długość śledzia [cm]") + ggtitle("Przewidywana długość śledzia")
 ```
 
-
+Wykres funkcji przewidującej długość śledzia w znacznym stopniu pokrywa się z wykresem stworzonym na bazie danych testowych. 
 
 ## Analizę ważności atrybutów najlepszego znalezionego modelu regresji. Analiza ważności atrybutów powinna stanowić próbę odpowiedzi na pytanie: co sprawia, że rozmiar śledzi zaczął w pewnym momencie maleć.
 
+```{r importance, echo=F, warning=F, message=F}
+imp <- varImp(fit, scale=FALSE)
+lbls <- sort(round(imp$importance[1]$Overall, 2), decreasing = T)
+ggplot(imp, mapping = NULL, top = dim(imp$importance)[1], environment = NULL) + theme_bw() + ylab("Ważność") + xlab("Atrybuty") + ggtitle("Ważność atrybutów w modelu") + geom_text(hjust = 1, label = lbls)
+```
 
 ## Jeśli analityk uzna to za stosowne, powyższe punkty mogę być wykonane w innej kolejności. Analityk nie musi, a nawet nie powinien, ograniczać się do powyższych punktów. Wszelkie dodatkowe techniki analizy danych, wizualizacje, spostrzeżenia będą pozytwnie wpływały na ocenę.
