@@ -16,8 +16,7 @@ knitr::opts_chunk$set(echo = T)
 
 # Wstęp
 
-// TODO 
-Ponadto raport powinien zaczynać się od rozdziału podsumowującego całą analizę, streszczającego najważniejsze spostrzeżenia analityka.
+Celem badania jest sprawdzenie przyczyny zmniejszenia się długości śledzi oceanicznych wyławianych na terenie Europy. W kolejnych rozdziałach zostały zaprezentowane wartości zmierzonych atrybutów, następnie pokazano podstawowe statystyki dotyczące poszczególnych pomiarów. W ostatnim rozdziale zbudowany został regresor, którego zadaniem jest przewidywanie długości śledzia na podstawie innych pomiarów. Z uzyskanego modelu wynika, że prawdopodobną przyczyną zmniejszenia się długości śledzia jest zmiana temperatury przy powierzchni wody. Ponadto, z analizy ważności atrybutów wynika, że na rozmiar śledzi wpływ ma przede wszystkim klimat, a nie bezpośrednia działalność człowieka. 
 
 # Wstępne przetwarzanie danych
 
@@ -207,7 +206,6 @@ ctrl <- trainControl(
     number = 2,
     # liczba powtórzeń
     repeats = 3)
-
 ```
 
 ```{r regression_fit, cache=T, echo=F, message=F, warning=F}
@@ -255,10 +253,12 @@ Wykres funkcji przewidującej długość śledzia w znacznym stopniu pokrywa si�
 
 Poniższy wykres pokazuje poziom ważności atrybutów w modelu użytym do predykcji rozmiaru śledzi:
 
-```{r importance, echo=F, warning=F, message=F}
+```{r importance, cache=T, echo=F, warning=F, message=F}
 imp <- varImp(fit, scale=FALSE)
 lbls <- sort(round(imp$importance[1]$Overall, 2), decreasing = T)
 ggplot(imp, mapping = NULL, top = dim(imp$importance)[1], environment = NULL) + theme_bw() + ylab("Ważność") + xlab("Atrybuty") + ggtitle("Ważność atrybutów w modelu") + geom_text(hjust = 1, label = lbls)
 ```
 
-Z analizy ważności atrybutów wynika, że na rozmiar śledzia w największym stopniu ma wpływ miesiąc połowu oraz temperatura przy powierzchni wody.
+Z analizy ważności atrybutów wynika, że na rozmiar śledzia w największym stopniu ma wpływ miesiąc połowu oraz temperatura przy powierzchni wody. Drugi z atrybutów jest jednocześnie najbardziej skorelowany z długością śledzia. Jednakże sam fakt występowania korelacji nie implikuje przyczynowości, tzn. nie można na podstawie korelacji stwierdzić, że zmiana temperatury przy powierzchni wody miała wpływ na zmniejszenie rozmiaru śledzi. Istnieje jednak szansa, że zmiany wystąpiły jednocześnie przez przypadek. Kolejnym skorelowanym z długością śledzia atrybutem jest oscylacja północnoatlantycka. 
+
+Podsumowując, z powyższych badań wynika, że zmiana długości śledzia jest spowodowana przede wszystkim zmianami klimatycznymi - podwyższeniem temperatury wody, a bezpośrednia działalność człowieka (intensywność połowów) nie ma w tym przypadku znaczenia. Nie można jednak na podstawie powyższej analizy stwierdzić, czy działalność człowieka nie ma pośredniego wpływu na klimat, który z kolei ma wpływ na rozmiar śledzi. 
