@@ -26,12 +26,18 @@ Ponadto raport powinien zaczynać się od rozdziału podsumowującego całą ana
 Wykorzystano następujące biblioteki: 
 
 ```{r load_libraries, message=F, warning=F}
+# manage data
 library(dplyr)
 library(tidyr)
+# plotting
 library(ggplot2)
 library(plotly)
+# manage NA's
 library(zoo)
+# melt correlation
 library(reshape2)
+# regression
+library(caret) # <- install.packages("caret", dependencies = c("Depends", "Suggests"))
 ```
 
 
@@ -163,6 +169,65 @@ ggplotly(p)
 # Regresor
 
 ## Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2 i RMSE.
+
+```{r regression_data_partition}
+set.seed(42)
+inTraining <- 
+    createDataPartition(
+        # atrybut do stratyfikacji
+        y = herring$length,
+        # procent w zbiorze uczącym
+        p = .75,
+        # chcemy indeksy a nie listę
+        list = FALSE)
+
+training <- herring[ inTraining,]
+testing  <- herring[-inTraining,]
+```
+
+```{r regression_train_control}
+ctrl <- trainControl(
+    # powtórzona ocena krzyżowa
+    method = "repeatedcv",
+    # liczba podziałów
+    number = 2,
+    # liczba powtórzeń
+    repeats = 3)
+
+```
+
+```{r regression_fit, cache=T}
+fit <- train(length ~ .,
+             data = training,
+             method = "rf",
+             trControl = ctrl,
+             #tuneLength = 20)
+             ntree = 10)
+
+
+```
+
+```{r fit_table}
+fit
+```
+
+```{r predict}
+predictions <- predict(fit, newdata = testing)
+postResample(pred = predictions, obs = testing$length)
+```
+
+0,0 - 0,5 - dopasowanie niezadowalające
+0,5 - 0,6 - dopasowanie słabe
+0,6 - 0,8 - dopasowanie zadowalające
+0,8 - 0,9 - dopasowanie dobre
+0,9 - 1,0 - dopasowanie bardzo dobre
+
+```{r plot_prediction_vs_testing}
+predictions_testing <- data.frame(X = 1:length(predictions), pred = predictions, test = testing$length)
+predictions_testing <- predictions_testing %>% gather(type, amount, c(pred, test))
+ggplot(predictions_testing, aes(x = X, y = amount, colour = type)) + geom_smooth() + theme_bw()
+```
+
 
 
 ## Analizę ważności atrybutów najlepszego znalezionego modelu regresji. Analiza ważności atrybutów powinna stanowić próbę odpowiedzi na pytanie: co sprawia, że rozmiar śledzi zaczął w pewnym momencie maleć.
